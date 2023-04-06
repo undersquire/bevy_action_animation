@@ -8,7 +8,7 @@ documentation = "https://docs.rs/bevy_action_animation"
 homepage = "https://github.com/undersquire/bevy_action_animation"
 repository = "https://github.com/undersquire/bevy_action_animation"
 readme = "README.md"
-description = ""
+description = "Action-based animation system."
 
 [dependencies]
 bevy_app = "0.10"
