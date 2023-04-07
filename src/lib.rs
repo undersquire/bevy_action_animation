@@ -31,8 +31,6 @@ pub use self::group::{Animation, AnimationGroup, AnimationMode};
 #[uuid = "ffb2128b-453f-41d2-a174-022aa35e71d7"]
 pub struct ClipMap {
     pub clips: Vec<Clip>,
-    pub width: f32,
-    pub height: f32,
 }
 
 #[derive(Clone, Default, Deref, DerefMut, TypeUuid, Serialize, Deserialize)]

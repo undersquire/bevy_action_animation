@@ -18,6 +18,17 @@ bevy_asset = "0.10"
 bevy_derive = "0.10"
 bevy_sprite = "0.10"
 bevy_reflect = "0.10"
-bevy_action = { version = "0.1", git = "https://www.github.com/undersquire/bevy_action" }
+bevy_action = "0.1"
 serde = { version = "1", default-features = false, features = ["derive"] }
 ron = "0.8"
+
+[dev-dependencies]
+bevy = "0.10"
+
+[[example]]
+name = "player_animations"
+path = "examples/player_animations.rs"
+
+[package.metadata.example.player_animations]
+name = "Player Animations"
+description = "An example of how player animations can be implemented using actions."
