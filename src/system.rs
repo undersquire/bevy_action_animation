@@ -8,6 +8,7 @@ use bevy_ecs::{
 };
 use bevy_sprite::TextureAtlasSprite;
 use bevy_time::Time;
+use rand::seq::SliceRandom;
 
 use super::{
     group::{AnimationAttribute, AnimationGroupOrderMode, AnimationMode},
@@ -30,6 +31,8 @@ pub(crate) fn queue_animations<T: Action>(
             continue;
         };
 
+        let mut thread_rng = rand::thread_rng();
+
         match group
             .ordering
             .clone()
@@ -40,8 +43,18 @@ pub(crate) fn queue_animations<T: Action>(
                     queue.push_back(animation.clone());
                 }
             }
-            AnimationGroupOrderMode::Random => {}
-            AnimationGroupOrderMode::RandomSelect => {}
+            AnimationGroupOrderMode::Random => {
+                let mut clips = group.clips.clone();
+
+                clips.shuffle(&mut thread_rng);
+
+                for animation in &group.clips {
+                    queue.push_back(animation.clone());
+                }
+            }
+            AnimationGroupOrderMode::RandomSelect => {
+                queue.push_back(group.clips.choose(&mut thread_rng).unwrap().clone());
+            }
         }
     }
 }

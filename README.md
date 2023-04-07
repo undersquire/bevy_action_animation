@@ -71,4 +71,5 @@ See the [examples](https://github.com/undersquire/bevy_action_animation/tree/mai
 - [ ] Better documentation
 - [ ] Support custom formats
 - [ ] Decouple animation files from the animation system
+- [ ] Migrate away from `rand` for RNG (once Bevy offers an RNG API)
 - [ ] Benchmark?
