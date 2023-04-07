@@ -9,6 +9,7 @@ homepage = "https://github.com/undersquire/bevy_action_animation"
 repository = "https://github.com/undersquire/bevy_action_animation"
 readme = "README.md"
 description = "Action-based animation system."
+keywords = ["bevy", "animation", "sprite", "action", "atlas"]
 
 [dependencies]
 rand = "0.8"
