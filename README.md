@@ -4,7 +4,7 @@ Action-based animation system for Bevy.
 
 ## Introduction
 
-This plugin provides users of the Bevy game engine with an action/trigger-based animation system.
+This plugin provides users of the [Bevy game engine](https://www.bevyengine.org/) with an action/trigger-based animation system.
 This kind of animation system makes for a more scalable framework for adding animations into a game,
 by providing the necessary tools to decouple animation logic from game logic.
 
@@ -17,7 +17,7 @@ This plugin is based on [bevy_action](https://www.github.com/undersquire/bevy_ac
 ### Actions
 
 Based on [bevy_action](https://www.github.com/undersquire/bevy_action), animations are configured tightly
-with specific action types defined by the user, and are triggered when the `AnimationPlugin`'s read an action
+with specific action types defined by the user, and are triggered when the `AnimationPlugin`'s internal systems read an action
 that corresponds to one of its defined animations.
 
 ### Animation Queue
@@ -60,14 +60,15 @@ Animations are defined in [RON](https://www.github.com/ron-rs/ron) files.
 
 **NOTE:** Custom formats will be supported in the future.
 
-An example of the format structure of the RON files is available in the [assets](https://www.github.com/undersquire/bevy_action_animation) directory.
+An example of the format structure of the RON files is available in the [assets](https://www.github.com/undersquire/bevy_action_animation/tree/main/assets) directory.
 
 ## Examples
 
-See the [examples](https://www.github.com/undersquire/bevy_action_animation) directory.
+See the [examples](https://github.com/undersquire/bevy_action_animation/tree/main/examples) directory.
 
 ## Future Work
 
+- [ ] Better documentation
 - [ ] Support custom formats
 - [ ] Decouple animation files from the animation system
 - [ ] Benchmark?
