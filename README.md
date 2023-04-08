@@ -73,3 +73,9 @@ See the [examples](https://github.com/undersquire/bevy_action_animation/tree/mai
 - [ ] Decouple animation files from the animation system
 - [ ] Migrate away from `rand` for RNG (once Bevy offers an RNG API)
 - [ ] Benchmark?
+
+## Compatibility
+
+ **Bevy Version** | **Plugin Version**
+---|---
+0.10.x | 0.1
