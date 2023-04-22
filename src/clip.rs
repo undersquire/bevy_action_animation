@@ -1,7 +1,8 @@
-use serde::{Deserialize, Serialize};
+use super::*;
 
 /// Represents a single clip from a texture atlas (supports negative-direction indexes).
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub struct Clip {
     pub first: usize,
     pub last: usize,

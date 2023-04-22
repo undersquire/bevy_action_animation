@@ -1,8 +1,8 @@
-use bevy_action::Action;
-use serde::{Deserialize, Serialize};
+use super::*;
 
 /// Represents the animation-play mode.
-#[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub enum AnimationMode {
     /// Plays the entire animation clip, once.
     #[default]
@@ -12,7 +12,8 @@ pub enum AnimationMode {
 }
 
 /// Represents attributes that can apply to different animation clips.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub enum AnimationAttribute<T: Action> {
     /// Flips the sprite horizontally during the animation.
     FlipX,
@@ -23,7 +24,8 @@ pub enum AnimationAttribute<T: Action> {
 }
 
 /// Represents a single animation clip.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub struct Animation<T: Action> {
     pub clip: usize,
     pub rate: f32,
@@ -32,7 +34,8 @@ pub struct Animation<T: Action> {
 }
 
 /// The order in which the animations in an animation group are added to the queue.
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub enum AnimationGroupOrderMode {
     /// In the order they appear, this is the default.
     #[default]
@@ -44,7 +47,8 @@ pub enum AnimationGroupOrderMode {
 }
 
 /// Represents a group of animations bound to an action.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone)]
+#[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub struct AnimationGroup<T: Action> {
     pub clips: Vec<Animation<T>>,
     pub ordering: Option<AnimationGroupOrderMode>,

@@ -1,6 +1,6 @@
 [package]
 name = "bevy_action_animation"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["undersquire"]
 license = "MIT OR Apache-2.0"
@@ -20,12 +20,17 @@ bevy_asset = "0.10"
 bevy_derive = "0.10"
 bevy_sprite = "0.10"
 bevy_reflect = "0.10"
-bevy_action = "0.1"
-serde = { version = "1", default-features = false, features = ["derive"] }
-ron = "0.8"
+bevy_action = { version = "0.2", git = "https://www.github.com/undersquire/bevy_action" }
+serde = { version = "1", optional = true }
+
+[features]
+default = ["derive"]
+derive = ["dep:serde"]
 
 [dev-dependencies]
 bevy = "0.10"
+ron = "0.8"
+serde = "1"
 
 [[example]]
 name = "player_animations"

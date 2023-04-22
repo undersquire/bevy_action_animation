@@ -4,17 +4,29 @@
 /// This example shows using actions for a few player animations.
 use bevy::{prelude::*, reflect::TypeUuid};
 use bevy_action::{Action, ActionEvent, ActionPlugin};
-use bevy_action_animation::{AnimationBundle, AnimationMap, AnimationPlugin, ClipMap, ClipPlugin};
+use bevy_action_animation::{AnimationBundle, AnimationMap, AnimationPlugin};
+use bevy_asset::{AssetLoader, LoadedAsset};
 use serde::{Deserialize, Serialize};
 
 /// Marker component for player.
 #[derive(Component)]
 struct Player;
 
-/// Player action enum (realistically this would be much bigger).
+/// Player action enum (represents all actions a player can do).
 /// This is also being used here as a component to track player state (for input handling).
 #[derive(
-    Clone, Copy, Debug, PartialEq, Eq, Hash, Default, Serialize, Deserialize, TypeUuid, Component,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Default,
+    TypeUuid,
+    Action,
+    Component,
+    Serialize,
+    Deserialize,
 )]
 #[uuid = "255554ef-9787-45ce-a7ca-105f6c819d5a"]
 enum PlayerAction {
@@ -26,18 +38,37 @@ enum PlayerAction {
     SwingFinished,
 }
 
-/// Deriving `Action` will be supported in the future, for now we must manually implement it.
-impl Action for PlayerAction {}
+struct AnimLoader;
 
+impl AssetLoader for AnimLoader {
+    fn load<'a>(
+        &'a self,
+        bytes: &'a [u8],
+        load_context: &'a mut bevy_asset::LoadContext,
+    ) -> bevy_asset::BoxedFuture<'a, Result<(), bevy_asset::Error>> {
+        Box::pin(async move {
+            let animation_map: AnimationMap<PlayerAction> = ron::de::from_bytes(bytes).unwrap();
+
+            load_context.set_default_asset(LoadedAsset::new(animation_map));
+
+            Ok(())
+        })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["anim.ron"]
+    }
+}
+
+#[bevy_main]
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         // Register the `ActionPlugin` for our action type.
         .add_plugin(ActionPlugin::<PlayerAction>::default())
-        // Register clip plugin (this will support settings and customization in the future).
-        .add_plugin(ClipPlugin)
         // Register the animation plugin for our action type.
         .add_plugin(AnimationPlugin::<PlayerAction>::default())
+        .add_asset_loader(AnimLoader)
         .add_system(setup.in_schedule(CoreSchedule::Startup))
         .add_systems((input, action_sender).chain())
         .add_system(swing_finished)
@@ -51,9 +82,6 @@ fn setup(
     mut action_events: EventWriter<ActionEvent<PlayerAction>>,
 ) {
     commands.spawn(Camera2dBundle::default());
-
-    // ClipMaps must currently be stored as a `.clip.ron` file. Custom formats will be supported in the future.
-    let clip_map: Handle<ClipMap> = asset_server.load("player.clip.ron");
 
     // Load our texture atlas normally
     let texture_handle = asset_server.load("player_sheet.png");
@@ -76,7 +104,6 @@ fn setup(
             },
             // Add the `AnimationBundle` to our entity, providing our ClipMap and AnimationMap. The rest should just be given the defaults.
             AnimationBundle {
-                clip_map,
                 animation_map,
                 ..default()
             },

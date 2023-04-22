@@ -6,16 +6,17 @@ use bevy_ecs::{
     prelude::{Entity, EventReader, EventWriter},
     system::{Query, Res},
 };
+use bevy_reflect::TypeUuid;
 use bevy_sprite::TextureAtlasSprite;
 use bevy_time::Time;
 use rand::seq::SliceRandom;
 
 use super::{
     group::{AnimationAttribute, AnimationGroupOrderMode, AnimationMode},
-    AnimationClip, AnimationMap, AnimationQueue, AnimationTimer, AnimationTriggers, ClipMap,
+    AnimationClip, AnimationMap, AnimationQueue, AnimationTimer, AnimationTriggers,
 };
 
-pub(crate) fn queue_animations<T: Action>(
+pub(crate) fn queue_animations<T: Action + TypeUuid>(
     maps: Res<Assets<AnimationMap<T>>>,
     mut actions: EventReader<ActionEvent<T>>,
     mut query: Query<(&Handle<AnimationMap<T>>, &mut AnimationQueue<T>)>,
@@ -27,7 +28,7 @@ pub(crate) fn queue_animations<T: Action>(
 
         let map = maps.get(map_handle).unwrap();
 
-        let Some(group) = map.get(&action.action) else {
+        let Some(group) = map.animations.get(&action.action) else {
             continue;
         };
 
@@ -59,22 +60,22 @@ pub(crate) fn queue_animations<T: Action>(
     }
 }
 
-pub(crate) fn process_animations<T: Action>(
+pub(crate) fn process_animations<T: Action + TypeUuid>(
     time: Res<Time>,
     mut query: Query<(
         Entity,
-        &Handle<ClipMap>,
+        &Handle<AnimationMap<T>>,
         &mut AnimationClip,
         &mut AnimationTimer,
         &mut AnimationQueue<T>,
         &mut TextureAtlasSprite,
         &mut AnimationTriggers<T>,
     )>,
-    clip_maps: Res<Assets<ClipMap>>,
+    animation_maps: Res<Assets<AnimationMap<T>>>,
     mut writer: EventWriter<ActionEvent<T>>,
 ) {
     query.for_each_mut(
-        |(entity, clip_map, mut clip, mut timer, mut queue, mut sprite, mut triggers)| {
+        |(entity, map, mut clip, mut timer, mut queue, mut sprite, mut triggers)| {
             timer.timer.tick(time.delta());
 
             if timer.timer.just_finished() {
@@ -109,13 +110,15 @@ pub(crate) fn process_animations<T: Action>(
                     return;
                 }
 
-                let Some(clip_map) = clip_maps.get(clip_map) else {
-                    return;
-                };
-
                 let next_animation = queue.pop_front().unwrap();
 
-                clip.0 = clip_map.clips.get(next_animation.clip).unwrap().clone();
+                let animation_map = animation_maps.get(map).unwrap();
+
+                clip.0 = animation_map
+                    .clips
+                    .get(next_animation.clip)
+                    .unwrap()
+                    .clone();
 
                 timer.mode = next_animation.mode;
 

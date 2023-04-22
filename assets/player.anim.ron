@@ -1,5 +1,27 @@
 (
-    {
+    clips: [
+        // Idle
+        (
+            first: 8,
+            last: 8,
+        ),
+        // Start Running
+        (
+            first: 0,
+            last: 1,
+        ),
+        // Running
+        (
+            first: 2,
+            last: 5,
+        ),
+        // Swing
+        (
+            first: 16,
+            last: 23,
+        )
+    ],
+    animations: {
         Idle: (
             clips: [
                 (
