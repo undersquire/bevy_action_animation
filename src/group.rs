@@ -16,9 +16,9 @@ pub enum AnimationMode {
 #[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub enum AnimationAttribute<T: Action> {
     /// Flips the sprite horizontally during the animation.
-    FlipX,
+    FlipX(bool),
     /// Flips the sprite vertically during the animation.
-    FlipY,
+    FlipY(bool),
     /// Triggers the given action when the animation finishes (`Once`) or is cancelled (`Repeating`).
     Trigger(T),
 }

@@ -128,13 +128,11 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
                     .set_duration(Duration::from_secs_f32(next_animation.rate));
 
                 sprite.index = clip.first;
-                sprite.flip_x = false;
-                sprite.flip_y = false;
 
                 for attribute in next_animation.attributes {
                     match attribute {
-                        AnimationAttribute::FlipX => sprite.flip_x = true,
-                        AnimationAttribute::FlipY => sprite.flip_y = true,
+                        AnimationAttribute::FlipX(flip) => sprite.flip_x = flip,
+                        AnimationAttribute::FlipY(flip) => sprite.flip_y = flip,
                         AnimationAttribute::Trigger(action) => {
                             triggers.push(action);
                         }
