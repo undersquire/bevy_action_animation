@@ -11,10 +11,7 @@ use bevy_sprite::TextureAtlasSprite;
 use bevy_time::Time;
 use rand::seq::SliceRandom;
 
-use super::{
-    group::{AnimationAttribute, AnimationGroupOrderMode, AnimationMode},
-    AnimationClip, AnimationMap, AnimationQueue, AnimationTimer, AnimationTriggers,
-};
+use super::*;
 
 pub(crate) fn queue_animations<T: Action + TypeUuid>(
     maps: Res<Assets<AnimationMap<T>>>,
@@ -34,17 +31,13 @@ pub(crate) fn queue_animations<T: Action + TypeUuid>(
 
         let mut thread_rng = rand::thread_rng();
 
-        match group
-            .ordering
-            .clone()
-            .unwrap_or(AnimationGroupOrderMode::Sequential)
-        {
-            AnimationGroupOrderMode::Sequential => {
+        match group.ordering.clone().unwrap_or_default() {
+            AnimationClipOrder::Sequential => {
                 for animation in &group.clips {
                     queue.push_back(animation.clone());
                 }
             }
-            AnimationGroupOrderMode::Random => {
+            AnimationClipOrder::Random => {
                 let mut clips = group.clips.clone();
 
                 clips.shuffle(&mut thread_rng);
@@ -53,7 +46,7 @@ pub(crate) fn queue_animations<T: Action + TypeUuid>(
                     queue.push_back(animation.clone());
                 }
             }
-            AnimationGroupOrderMode::RandomSelect => {
+            AnimationClipOrder::RandomSelect => {
                 queue.push_back(group.clips.choose(&mut thread_rng).unwrap().clone());
             }
         }
@@ -65,80 +58,64 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
     mut query: Query<(
         Entity,
         &Handle<AnimationMap<T>>,
-        &mut AnimationClip,
-        &mut AnimationTimer,
+        &mut AnimationState<T>,
         &mut AnimationQueue<T>,
         &mut TextureAtlasSprite,
-        &mut AnimationTriggers<T>,
     )>,
     animation_maps: Res<Assets<AnimationMap<T>>>,
     mut writer: EventWriter<ActionEvent<T>>,
 ) {
-    query.for_each_mut(
-        |(entity, map, mut clip, mut timer, mut queue, mut sprite, mut triggers)| {
-            timer.timer.tick(time.delta());
+    query.for_each_mut(|(entity, map, mut state, mut queue, mut sprite)| {
+        state.timer.tick(time.delta());
 
-            if timer.timer.just_finished() {
-                sprite.index = if sprite.index == clip.last {
-                    if timer.mode == AnimationMode::Repeating {
-                        clip.first
-                    } else {
-                        clip.last
-                    }
+        if state.timer.just_finished() {
+            sprite.index = if sprite.index == state.clip.1 {
+                if state.looping {
+                    state.clip.0
                 } else {
-                    if clip.first < clip.last {
-                        sprite.index + 1
-                    } else {
-                        sprite.index - 1
-                    }
+                    state.clip.1
+                }
+            } else {
+                if state.clip.0 < state.clip.1 {
+                    sprite.index + 1
+                } else {
+                    sprite.index - 1
                 }
             }
+        }
 
-            if match timer.mode {
-                AnimationMode::Once => sprite.index == clip.last,
-                AnimationMode::Repeating => queue.len() > 0,
-            } {
-                for trigger in triggers.drain(..) {
-                    writer.send(ActionEvent::<T> {
-                        action: trigger,
-                        entity,
-                    });
-                }
-
-                // TODO: Improve this
-                if queue.len() == 0 {
-                    return;
-                }
-
-                let next_animation = queue.pop_front().unwrap();
-
-                let animation_map = animation_maps.get(map).unwrap();
-
-                clip.0 = animation_map
-                    .clips
-                    .get(next_animation.clip)
-                    .unwrap()
-                    .clone();
-
-                timer.mode = next_animation.mode;
-
-                timer.timer.reset();
-                timer
-                    .timer
-                    .set_duration(Duration::from_secs_f32(next_animation.rate));
-
-                sprite.index = clip.first;
-
-                for attribute in next_animation.attributes {
-                    match attribute {
-                        AnimationAttribute::FlipX(flip) => sprite.flip_x = flip,
-                        AnimationAttribute::FlipY(flip) => sprite.flip_y = flip,
-                        AnimationAttribute::Trigger(action) => {
-                            triggers.push(action);
-                        }
-                    }
-                }
+        if match state.looping {
+            false => sprite.index == state.clip.1,
+            true => queue.len() > 0,
+        } {
+            for trigger in state.triggers.drain(..) {
+                writer.send(ActionEvent::<T> {
+                    action: trigger,
+                    entity,
+                });
             }
-        },
-    );
+
+            // TODO: Improve this
+            if queue.len() == 0 {
+                return;
+            }
+
+            let next_animation = queue.pop_front().unwrap();
+
+            let animation_map = animation_maps.get(map).unwrap();
+
+            state.clip = animation_map.clips.get(&next_animation.id).unwrap().clone();
+
+            state.looping = next_animation.looping.unwrap_or_default();
+
+            state.timer.reset();
+            state
+                .timer
+                .set_duration(Duration::from_secs_f32(next_animation.frame_speed));
+
+            sprite.index = state.clip.0;
+
+            state.triggers = next_animation.triggers;
+        }
+    });
 }

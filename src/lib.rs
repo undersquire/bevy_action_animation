@@ -18,58 +18,48 @@ use bevy_time::{Timer, TimerMode};
 #[cfg(feature = "derive")]
 use serde::{Deserialize, Serialize};
 
-pub use self::clip::Clip;
-pub use self::group::{Animation, AnimationGroup, AnimationMode};
+pub use clip::Clip;
+use group::*;
 
 /// Represents a map of action to corresponding animation.
 #[derive(Clone, Default, TypeUuid)]
 #[uuid = "8c54c8ca-0f56-4463-a1ca-e4c7bbc5a76b"]
 #[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
 pub struct AnimationMap<T: Action + TypeUuid> {
-    clips: Vec<Clip>,
-    animations: HashMap<T, AnimationGroup<T>>,
+    clips: HashMap<String, Clip>,
+    animations: HashMap<T, AnimationSet<T>>,
 }
-
-/// Represents the current clip information (used by internal systems).
-#[derive(Clone, Default, Deref, DerefMut, Component)]
-pub struct AnimationClip(pub Clip);
 
 /// Represents the current animation timing information (used by internal systems).
 #[derive(Clone, Default, Component)]
-pub struct AnimationTimer {
+pub struct AnimationState<T: Action> {
+    pub clip: Clip,
     pub timer: Timer,
-    pub mode: AnimationMode,
+    pub looping: bool,
+    pub triggers: Vec<T>,
 }
 
 /// Represents the animation queue (used by internal systems).
 #[derive(Clone, Default, Deref, DerefMut, Component)]
-pub struct AnimationQueue<T: Action>(pub VecDeque<Animation<T>>);
-
-/// Stores all of the actions to trigger after the current animation finishes.
-#[derive(Clone, Default, Deref, DerefMut, Component)]
-pub struct AnimationTriggers<T: Action>(pub Vec<T>);
+pub struct AnimationQueue<T: Action>(pub VecDeque<AnimationClip<T>>);
 
 /// A bundle of all necessary components for the animation system to work.
 #[derive(Clone, Bundle)]
 pub struct AnimationBundle<T: Action + TypeUuid> {
-    pub animation_map: Handle<AnimationMap<T>>,
-    pub clip: AnimationClip,
-    pub timer: AnimationTimer,
+    pub map: Handle<AnimationMap<T>>,
+    pub state: AnimationState<T>,
     pub queue: AnimationQueue<T>,
-    pub triggers: AnimationTriggers<T>,
 }
 
 impl<T: Action + TypeUuid> Default for AnimationBundle<T> {
     fn default() -> Self {
         Self {
-            animation_map: Default::default(),
-            clip: Default::default(),
-            timer: AnimationTimer {
+            map: Default::default(),
+            state: AnimationState {
                 timer: Timer::from_seconds(1.0, TimerMode::Repeating),
-                mode: AnimationMode::Once,
+                ..Default::default()
             },
             queue: AnimationQueue::<T>::default(),
-            triggers: AnimationTriggers::<T>::default(),
         }
     }
 }
