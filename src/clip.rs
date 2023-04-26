@@ -7,4 +7,4 @@ pub struct Clip(pub usize, pub usize);
 
 /// Represents a map of clip identifiers to the clip information.
 #[derive(Debug, Clone, Default, Deref, DerefMut, Component)]
-pub struct ClipMap(HashMap<String, Clip>);
+pub struct ClipMap(pub HashMap<String, Clip>);
