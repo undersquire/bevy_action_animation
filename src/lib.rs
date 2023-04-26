@@ -18,17 +18,14 @@ use bevy_time::{Timer, TimerMode};
 #[cfg(feature = "derive")]
 use serde::{Deserialize, Serialize};
 
-pub use clip::Clip;
+pub use clip::*;
 use group::*;
 
 /// Represents a map of action to corresponding animation.
-#[derive(Clone, Default, TypeUuid)]
+#[derive(Clone, Default, Deref, DerefMut, TypeUuid)]
 #[uuid = "8c54c8ca-0f56-4463-a1ca-e4c7bbc5a76b"]
 #[cfg_attr(feature = "derive", derive(Serialize, Deserialize))]
-pub struct AnimationMap<T: Action + TypeUuid> {
-    clips: HashMap<String, Clip>,
-    animations: HashMap<T, AnimationSet<T>>,
-}
+pub struct AnimationMap<T: Action + TypeUuid>(HashMap<T, AnimationSet<T>>);
 
 /// Represents the current animation timing information (used by internal systems).
 #[derive(Clone, Default, Component)]

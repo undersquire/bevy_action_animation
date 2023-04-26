@@ -25,7 +25,7 @@ pub(crate) fn queue_animations<T: Action + TypeUuid>(
 
         let map = maps.get(map_handle).unwrap();
 
-        let Some(group) = map.animations.get(&action.action) else {
+        let Some(group) = map.get(&action.action) else {
             continue;
         };
 
@@ -57,15 +57,14 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
     time: Res<Time>,
     mut query: Query<(
         Entity,
-        &Handle<AnimationMap<T>>,
+        &ClipMap,
         &mut AnimationState<T>,
         &mut AnimationQueue<T>,
         &mut TextureAtlasSprite,
     )>,
-    animation_maps: Res<Assets<AnimationMap<T>>>,
     mut writer: EventWriter<ActionEvent<T>>,
 ) {
-    query.for_each_mut(|(entity, map, mut state, mut queue, mut sprite)| {
+    query.for_each_mut(|(entity, clip_map, mut state, mut queue, mut sprite)| {
         state.timer.tick(time.delta());
 
         if state.timer.just_finished() {
@@ -75,12 +74,10 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
                 } else {
                     state.clip.1
                 }
+            } else if state.clip.0 < state.clip.1 {
+                sprite.index + 1
             } else {
-                if state.clip.0 < state.clip.1 {
-                    sprite.index + 1
-                } else {
-                    sprite.index - 1
-                }
+                sprite.index - 1
             }
         }
 
@@ -102,9 +99,7 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
 
             let next_animation = queue.pop_front().unwrap();
 
-            let animation_map = animation_maps.get(map).unwrap();
-
-            state.clip = animation_map.clips.get(&next_animation.id).unwrap().clone();
+            state.clip = clip_map.get(&next_animation.id).unwrap().clone();
 
             state.looping = next_animation.looping.unwrap_or_default();
 
