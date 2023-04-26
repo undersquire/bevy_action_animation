@@ -7,7 +7,7 @@ pub struct AnimationClip<T: Action> {
     pub id: String,
     pub frame_speed: f32,
     pub looping: Option<bool>,
-    pub triggers: Vec<T>,
+    pub triggers: Option<Vec<T>>,
 }
 
 /// The order in which the animations in an animation group are added to the queue.
