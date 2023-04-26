@@ -110,7 +110,7 @@ pub(crate) fn process_animations<T: Action + TypeUuid>(
 
             sprite.index = state.clip.0;
 
-            state.triggers = next_animation.triggers;
+            state.triggers = next_animation.triggers.unwrap_or_default();
         }
     });
 }
