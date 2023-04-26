@@ -2,10 +2,7 @@ mod clip;
 mod group;
 mod system;
 
-use std::{
-    collections::{HashMap, VecDeque},
-    marker::PhantomData,
-};
+use std::{collections::VecDeque, marker::PhantomData};
 
 use bevy_action::Action;
 use bevy_app::{App, CoreSet, Plugin};
@@ -14,6 +11,7 @@ use bevy_derive::{Deref, DerefMut};
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfigs};
 use bevy_reflect::TypeUuid;
 use bevy_time::{Timer, TimerMode};
+use bevy_utils::HashMap;
 
 #[cfg(feature = "derive")]
 use serde::{Deserialize, Serialize};
